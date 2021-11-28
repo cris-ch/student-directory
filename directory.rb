@@ -1,40 +1,5 @@
 @students = [] # an empty array accessible to all methods
 
-def print_header
-  puts "The students of Villains Academy".center(100)
-  puts "-------------".center(100)
-end
-
-def input_students
-  puts "Please enter the informatiom of the students."
-  puts "To finish, just don't enter any name and hit return"
-  # get the first name
-  puts "Enter name:"
-  name = gets.chomp
-  # while the name is not empty, repeat this code
-  while !name.empty? do
-    # get the rest of the information for student
-    puts "Enter cohort:"
-    cohort = gets.chomp.gsub("\n","")
-    puts "Enter hobbies:"
-    hobbies = gets.chomp
-    puts "Enter country of birth:"
-    country = gets.chomp
-    # add the student hash to the array
-    @students << {name: name, cohort: cohort, hobbies: hobbies, country: country}
-    puts "Now we have #{@students.count} students"
-    # get another name from the user
-    puts "Enter name:"
-    name = gets.chomp
-  end
-end
-
-def print_students_list
-  @students.each_with_index() do |student, idx|
-    puts "#{idx}. #{student[:name]}. Cohort: #{student[:cohort]}, Hobbies: #{student[:hobbies]}, Country: #{student[:country]} "
-  end
-end
-
 def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
@@ -43,10 +8,11 @@ def print_menu
   puts "9. Exit" # 9 because we'll be adding more items  
 end
 
-def show_students
-  print_header
-  print_students_list
-  print_footer
+def interactive_menu
+  loop do
+    print_menu
+    process(STDIN.gets.chomp)
+  end
 end
 
 def process(selection)
@@ -62,14 +28,48 @@ def process(selection)
     when "9"
       exit
     else
-      puts "I don't know what you mean, try again"
+      puts "I don't know what you meant, try again"
   end
 end
 
-def interactive_menu
-  loop do
-    print_menu
-    process(gets.chomp)
+def input_students
+  puts "Please enter the informatiom of the students."
+  puts "To finish, just don't enter any name and hit return"
+  # get the first name
+  puts "Enter name:"
+  name = STDIN.gets.chomp
+  # while the name is not empty, repeat this code
+  while !name.empty? do
+    # get the rest of the information for student
+    puts "Enter cohort:"
+    cohort = STDIN.gets.chomp.gsub("\n","")
+    puts "Enter hobbies:"
+    hobbies = STDIN.gets.chomp
+    puts "Enter country of birth:"
+    country = STDIN.gets.chomp
+    # add the student hash to the array
+    @students << {name: name, cohort: cohort, hobbies: hobbies, country: country}
+    puts "Now we have #{@students.count} students"
+    # get another name from the user
+    puts "Enter name:"
+    name = STDIN.gets.chomp
+  end
+end
+
+def show_students
+  print_header
+  print_students_list
+  print_footer
+end
+
+def print_header
+  puts "The students of Villains Academy".center(100)
+  puts "-------------".center(100)
+end
+
+def print_students_list
+  @students.each_with_index() do |student, idx|
+    puts "#{idx}. #{student[:name]}. Cohort: #{student[:cohort]}, Hobbies: #{student[:hobbies]}, Country: #{student[:country]} "
   end
 end
 
@@ -81,6 +81,7 @@ def print_footer
   end
 end
 
+# save students data to file
 def save_students
   # open the file for writing
   file = File.open("students.csv", "w")
@@ -93,13 +94,28 @@ def save_students
   file.close
 end
 
-def load_students
-  file = File.open("students.csv", "r")
+# load students data from file
+def load_students(filename = "students.csv")
+  # open file for reading
+  file = File.open(filename, "r")
+  # iterate over the array of students
   file.readlines.each do |line|
-    name, cohort, hobbies, country = line.chomp.split(',')
+  name, cohort, hobbies, country = line.chomp.split(',')
     @students << {name: name, cohort: cohort, hobbies: hobbies, country: country}
   end
   file.close
+end
+
+def try_load_students
+  filename = ARGV.first # first argument from the command line
+  return if filename.nil? # get out of the method if it isn't given
+  if File.exists?(filename) # if it exists
+    load_students(filename)
+    puts "Loaded #{@students.count} from #{filename}"
+  else # if it doesn't exist
+    puts "Sorry, #{filename} doesn't exist."
+    exit # quit the program
+  end
 end
 
 interactive_menu
