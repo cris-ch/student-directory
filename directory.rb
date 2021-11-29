@@ -1,10 +1,12 @@
+require 'csv'
+
 @students = [] # an empty array accessible to all methods
 
 def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
-  puts "3. Save the list to students.csv"
-  puts "4. Load the list from students.csv"
+  puts "3. Save the list to file"
+  puts "4. Load the list from file"
   puts "9. Exit" # 9 because we'll be adding more items  
 end
 
@@ -22,9 +24,13 @@ def process(selection)
     when "2"
       show_students
     when "3"
-      save_students
+      puts "Choose file to save:"
+      filename = gets.chomp
+      save_students(filename)
     when "4"
-      load_students
+      puts "Choose file to save:"
+      filename = gets.chomp
+      load_students(filename)
     when "9"
       exit
     else
@@ -32,28 +38,34 @@ def process(selection)
   end
 end
 
+# write students data to @students array
+def write_array
+  @students << {name: @name, cohort: @cohort, hobbies: @hobbies, country: @country}
+end
+
 def input_students
   puts "Please enter the informatiom of the students."
-  puts "To finish, just don't enter any name and hit return"
+  puts "To finish, don't enter any name and hit return"
   # get the first name
   puts "Enter name:"
-  name = STDIN.gets.chomp
+  @name = STDIN.gets.chomp
   # while the name is not empty, repeat this code
-  while !name.empty? do
+  while !@name.empty? do
     # get the rest of the information for student
     puts "Enter cohort:"
-    cohort = STDIN.gets.chomp.gsub("\n","")
+    @cohort = STDIN.gets.gsub("\n","")
     puts "Enter hobbies:"
-    hobbies = STDIN.gets.chomp
+    @hobbies = STDIN.gets.chomp
     puts "Enter country of birth:"
-    country = STDIN.gets.chomp
-    # add the student hash to the array
-    @students << {name: name, cohort: cohort, hobbies: hobbies, country: country}
+    @country = STDIN.gets.chomp
+    # call method to add student info to students array
+    write_array
     puts "Now we have #{@students.count} students"
     # get another name from the user
     puts "Enter name:"
-    name = STDIN.gets.chomp
+    @name = STDIN.gets.chomp
   end
+  puts "You succesfully updated student(s) information."
 end
 
 def show_students
@@ -75,47 +87,53 @@ end
 
 def print_footer
   if @students.length == 1 
-    puts "Overall, we have #{@students.count} great student".center(20)
+    puts "Overall, we have #{@students.count} great student".center(100)
   else
-    puts "Overall, we have #{@students.count} great students".center(20)
+    puts "Overall, we have #{@students.count} great students".center(100)
   end
 end
 
+def ask_file
+  puts "Choose file:"
+  filename = gets.chomp
+  filename
+end
+
 # save students data to file
-def save_students
-  # open the file for writing
-  file = File.open("students.csv", "w")
-  # iterate over the array of students
-  @students.each do |student|
+def save_students(filename)
+  file = File.open(filename, "w")  # open the file for writing
+  @students.each do |student|  # iterate over the array of students
     student_data = [student[:name], student[:cohort], student[:hobbies], student[:country]]
     csv_line = student_data.join(",")
     file.puts csv_line
   end
   file.close
+  "Succesfully saved students to #{filename}"
 end
 
 # load students data from file
-def load_students(filename = "students.csv")
-  # open file for reading
-  file = File.open(filename, "r")
-  # iterate over the array of students
-  file.readlines.each do |line|
-  name, cohort, hobbies, country = line.chomp.split(',')
-    @students << {name: name, cohort: cohort, hobbies: hobbies, country: country}
+def load_students(filename)
+  file = File.open(filename, "r")   # open file for reading
+  counter = 0
+  file.readlines.each do |line|   # iterate over the array of students
+    @name, @cohort, @hobbies, @country = line.chomp.split(',')
+    write_array     # call method to add student info to students array
+    counter += 1
   end
+  puts "Loaded #{counter} students from #{filename}"
   file.close
 end
 
 def try_load_students
   filename = ARGV.first # first argument from the command line
-  return if filename.nil? # get out of the method if it isn't given
+  filename = "students.csv" if filename.nil? # load "students.csv" by default if it isn't given
   if File.exists?(filename) # if it exists
     load_students(filename)
-    puts "Loaded #{@students.count} from #{filename}"
   else # if it doesn't exist
     puts "Sorry, #{filename} doesn't exist."
     exit # quit the program
   end
 end
 
+try_load_students
 interactive_menu
