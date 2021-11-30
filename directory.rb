@@ -101,27 +101,27 @@ end
 
 # save students data to file
 def save_students(filename)
-  file = File.open(filename, "w")  # open the file for writing
-  @students.each do |student|  # iterate over the array of students
-    student_data = [student[:name], student[:cohort], student[:hobbies], student[:country]]
-    csv_line = student_data.join(",")
-    file.puts csv_line
+  File.open(filename, "w")  do |file| # open the file for writing
+    @students.each do |student|  # iterate over the array of students
+      student_data = [student[:name], student[:cohort], student[:hobbies], student[:country]]
+      csv_line = student_data.join(",")
+      file.puts csv_line
+    end
   end
-  file.close
-  "Succesfully saved students to #{filename}"
+  puts "Succesfully saved students to #{filename}"
 end
 
 # load students data from file
 def load_students(filename)
-  file = File.open(filename, "r")   # open file for reading
-  counter = 0
-  file.readlines.each do |line|   # iterate over the array of students
-    @name, @cohort, @hobbies, @country = line.chomp.split(',')
-    write_array     # call method to add student info to students array
-    counter += 1
+  File.open(filename, "r") do |file| # open file for reading
+    counter = 0
+    file.readlines.each do |line|   # iterate over the array of students
+      @name, @cohort, @hobbies, @country = line.chomp.split(',')
+      write_array     # call method to add student info to students array
+      counter += 1
+    end
+    puts "Loaded #{counter} students from #{filename}"
   end
-  puts "Loaded #{counter} students from #{filename}"
-  file.close
 end
 
 def try_load_students
