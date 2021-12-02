@@ -18,19 +18,26 @@ def interactive_menu
 end
 
 def process(selection)
+  p filename
+  p save_file
+  p load_file
   case selection
     when "1"
       input_students
     when "2"
       show_students
     when "3"
-      puts "Choose file to save:"
-      filename = gets.chomp
-      save_students(filename)
+      puts "Choose file to save to:"
+      save_file = gets.chomp
+      save_students(save_file)
     when "4"
-      puts "Choose file to save:"
-      filename = gets.chomp
-      load_students(filename)
+      puts "Choose file to load from:"
+      load_file = gets.chomp
+      if File.exists?(load_file) # if it exists
+        load_students(load_file)
+      else # if it doesn't exist
+        puts "Sorry, #{load_file} doesn't exist."
+      end
     when "9"
       exit
     else
@@ -93,35 +100,26 @@ def print_footer
   end
 end
 
-def ask_file
-  puts "Choose file:"
-  filename = gets.chomp
-  filename
-end
-
 # save students data to file
 def save_students(filename)
-  File.open(filename, "w")  do |file| # open the file for writing
-    @students.each do |student|  # iterate over the array of students
-      student_data = [student[:name], student[:cohort], student[:hobbies], student[:country]]
-      csv_line = student_data.join(",")
-      file.puts csv_line
+  p filename
+  CSV.open(filename, "wb") do |csv|
+    @students.each do |student|
+      csv << student.values_at(:name, :cohort, :hobbies, :country)
     end
   end
-  puts "Succesfully saved students to #{filename}"
+  puts "Succesfully saved #{@students.length} students to #{filename}"
 end
 
 # load students data from file
 def load_students(filename)
-  File.open(filename, "r") do |file| # open file for reading
-    counter = 0
-    file.readlines.each do |line|   # iterate over the array of students
-      @name, @cohort, @hobbies, @country = line.chomp.split(',')
-      write_array     # call method to add student info to students array
-      counter += 1
-    end
-    puts "Loaded #{counter} students from #{filename}"
+  counter = 0
+  keys = [:name, :cohort, :hobbies, :country]
+  CSV.foreach(filename, headers: keys) do |row|
+    @students << row.to_hash
+    counter += 1
   end
+  puts "Loaded #{counter} student(s) from #{filename}"
 end
 
 def try_load_students
