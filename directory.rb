@@ -18,9 +18,6 @@ def interactive_menu
 end
 
 def process(selection)
-  p filename
-  p save_file
-  p load_file
   case selection
     when "1"
       input_students
@@ -28,11 +25,11 @@ def process(selection)
       show_students
     when "3"
       puts "Choose file to save to:"
-      save_file = gets.chomp
+      save_file = STDIN.gets.chomp
       save_students(save_file)
     when "4"
       puts "Choose file to load from:"
-      load_file = gets.chomp
+      load_file = STDIN.gets.chomp
       if File.exists?(load_file) # if it exists
         load_students(load_file)
       else # if it doesn't exist
@@ -72,7 +69,7 @@ def input_students
     puts "Enter name:"
     @name = STDIN.gets.chomp
   end
-  puts "You succesfully updated student(s) information."
+  puts "You succesfully updated student(s) information.".center(100)
 end
 
 def show_students
@@ -108,7 +105,7 @@ def save_students(filename)
       csv << student.values_at(:name, :cohort, :hobbies, :country)
     end
   end
-  puts "Succesfully saved #{@students.length} students to #{filename}"
+  puts "Succesfully saved #{@students.length} students to #{filename}".center(100)
 end
 
 # load students data from file
@@ -119,7 +116,8 @@ def load_students(filename)
     @students << row.to_hash
     counter += 1
   end
-  puts "Loaded #{counter} student(s) from #{filename}"
+  puts "Loaded #{counter} student(s) from #{filename}".center(100)
+  print_footer
 end
 
 def try_load_students
